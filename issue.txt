@@ -1,0 +1,4 @@
+Since Exonum (the paper's choice) is deprecated/hard to run, 
+the correct academic substitution is a Python-based permissioned blockchain simulation
+ that implements the exact same logic: 
+ BFT-style commit, append-only ledger, hash deduplication, and a REST verification API.
