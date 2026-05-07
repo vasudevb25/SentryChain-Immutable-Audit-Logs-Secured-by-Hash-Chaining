@@ -1,3 +1,6 @@
 kafka_2.13-3.7.0
 private.pem
 public.pem
+kafka_2.13-3.7.0/
+venv/
+*.tgz
