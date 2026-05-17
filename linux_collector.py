@@ -8,7 +8,6 @@ from kafka import KafkaProducer
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 
-# =========================
 # Kafka Setup
 # =========================
 producer = KafkaProducer(
@@ -16,7 +15,6 @@ producer = KafkaProducer(
     value_serializer=lambda v: json.dumps(v).encode('utf-8')
 )
 
-# =========================
 # Load Keys
 # =========================
 with open("private.pem", "rb") as f:
@@ -28,7 +26,6 @@ with open("private.pem", "rb") as f:
 with open("public.pem", "rb") as f:
     public_key_bytes = f.read().decode()
 
-# =========================
 # Sign Function
 # =========================
 def sign_data(data):
@@ -41,7 +38,6 @@ def sign_data(data):
         hashes.SHA256()
     ).hex()
 
-# =========================
 # Syslog Parser
 # =========================
 def parse_syslog(log):
@@ -71,7 +67,6 @@ def parse_syslog(log):
         "message": message
     }
 
-# =========================
 # UDP Setup
 # =========================
 UDP_IP = "127.0.0.1"
@@ -82,7 +77,6 @@ sock.bind((UDP_IP, UDP_PORT))
 
 print(f"[Collector] Listening on {UDP_IP}:{UDP_PORT}")
 
-# =========================
 # Main Loop
 # =========================
 while True:
@@ -91,28 +85,20 @@ while True:
     raw_data = data.decode().strip()
     log = parse_syslog(raw_data)
 
-    # Step 1: Create payload
+    # Step 1: Create payload (paper: Pji)
     payload = {
         "log": log,
         "source_id": "system_1",
         "public_key": public_key_bytes
     }
 
-    # Step 2: Serialize payload
-    payload_string = json.dumps(
-        payload,
-        sort_keys=True
-    )
+    payload_string = json.dumps(payload, sort_keys=True)
 
-    # Step 3: Compute SHA256 hash
-    log_hash = hashlib.sha256(
-        payload_string.encode()
-    ).hexdigest()
+    # Step 2: Hash (Hji)
+    log_hash = hashlib.sha256(payload_string.encode()).hexdigest()
 
-    # Step 4: Sign SAME payload
-    signature = sign_data(
-        payload_string
-    )
+    # Step 3: Sign (Sji)
+    signature = sign_data(payload_string)
 
     # Step 4: Final Evidence Structure
     evidence = {
@@ -123,10 +109,6 @@ while True:
         "source_ip": addr[0]
     }
 
-    # Save latest evidence for verification testing
-    with open("sample_evidence.json", "w") as f:
-        json.dump(evidence, f, indent=4)
-
     print("[Collector] Evidence:", evidence)
 
     # Step 5: Send to Kafka
@@ -135,6 +117,3 @@ while True:
         producer.flush()
     except Exception as e:
         print("Kafka error:", e)
-
-
-
