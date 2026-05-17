@@ -6,15 +6,15 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import serialization
 
-# =========================================================
+#   
 # CONFIG
-# =========================================================
+#   
 
 BLOCKCHAIN_URL = "http://localhost:8000"
 
-# =========================================================
+#   
 # LOAD PUBLIC KEY
-# =========================================================
+#   
 
 with open("public.pem", "rb") as f:
 
@@ -22,10 +22,10 @@ with open("public.pem", "rb") as f:
         f.read()
     )
 
-# =========================================================
+#   
 # COMPUTE HASH
 # Must match collector.py EXACTLY
-# =========================================================
+#   
 
 def compute_hash(payload):
 
@@ -38,9 +38,9 @@ def compute_hash(payload):
         payload_string.encode()
     ).hexdigest()
 
-# =========================================================
+#   
 # VERIFY SIGNATURE
-# =========================================================
+#   
 
 def verify_signature(payload, signature_hex):
 
@@ -81,9 +81,9 @@ def verify_signature(payload, signature_hex):
 
         return False
 
-# =========================================================
+#   
 # VERIFY EVIDENCE
-# =========================================================
+#   
 
 def verify_evidence(evidence):
 
@@ -205,9 +205,9 @@ def verify_evidence(evidence):
             f"\n[Auditor] Verification error: {e}"
         )
 
-# =========================================================
+#   
 # TEST FILE
-# =========================================================
+#   
 
 if __name__ == "__main__":
 
