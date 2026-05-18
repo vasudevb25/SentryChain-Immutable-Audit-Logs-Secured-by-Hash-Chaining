@@ -15,7 +15,7 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import serialization
 from fastapi.middleware.cors import CORSMiddleware
 
-  
+import time
 # MERKLE TREE
 def compute_merkle_root(tx_ids):
     hashes_list = tx_ids[:]
@@ -123,11 +123,10 @@ class Block:
             "transactions": [tx.to_dict() for tx in self.transactions]   
         }
 
-
 # BLOCKCHAIN
 class PermissionedBlockchain:
-    BLOCK_TIMEOUT_SECONDS = 5
-    MAX_TX_PER_BLOCK = 100
+    BLOCK_TIMEOUT_SECONDS = 2
+    MAX_TX_PER_BLOCK = 5
 
     def __init__(self):
         self.chain = []
@@ -408,6 +407,14 @@ app.add_middleware(
 )
 blockchain = PermissionedBlockchain()
 
+# =========================================================
+# TPS METRICS
+# =========================================================
+
+START_TIME = time.time()
+
+TOTAL_TRANSACTIONS = 0
+
 # Models
 class SubmitRequest(BaseModel):
     log_hash: str
@@ -423,6 +430,15 @@ class VerifyRequest(BaseModel):
 @app.post("/submit")
 def submit(req: SubmitRequest):
     try:
+        global TOTAL_TRANSACTIONS
+        # existing validation logic...
+        TOTAL_TRANSACTIONS += 1
+        elapsed_time = time.time() - START_TIME
+        tps = TOTAL_TRANSACTIONS / elapsed_time
+        print(
+            f"[Blockchain] TPS: {tps:.2f} | "
+            f"Total TX: {TOTAL_TRANSACTIONS}"
+        )
         return blockchain.submit_transaction(
             req.log_hash,
             req.source_id,
